@@ -1,0 +1,37 @@
+---
+- name: display version and given interface configuration
+  hosts: leaf-nodes
+  connection: local
+  gather_facts: no
+
+  vars:
+    cli:
+      host: "{{ inventory_hostname }}"
+      username: "{{ hostvars[groups['fabric-nodes'][0]].ansible_user }}"
+      password: "{{ hostvars[groups['fabric-nodes'][0]].ansible_ssh_pass }}"
+      transport: cli
+
+    ifname: mgmt0
+
+  tasks:
+    - name: run show version on remote devices
+      nxos_command:
+        commands: show version
+        provider: "{{ cli }}"
+      register: result_version
+
+    - name: run show interface {{ifname}}
+      nxos_command: 
+        commands: show run interface {{ifname}}
+        provider: "{{ cli }}"
+      register: result_interface
+
+    - name: display results version
+      debug: 
+        var: result_version
+        verbosity: 2
+        
+    - name: display results interface
+      debug: 
+        var: result_interface
+        verbosity: 2
